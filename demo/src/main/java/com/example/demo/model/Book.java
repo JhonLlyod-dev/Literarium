@@ -11,6 +11,7 @@ public class Book {
     private Long id;
     private String title;
     private String author;
+    private String year;
     private String pages;
     private String description;
     private String genre;
