@@ -1,9 +1,12 @@
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ChevronRight,Search } from 'lucide-react'
 import { books } from '../assets/Data'
 
+
 export default function SearchBook() {
+
+  const navigate = useNavigate()
   return (
     <div className='flex flex-col gap-4 '>
         <div className="border border-gray-200 shadow-xs text-xs  flex items-center gap-2 w-full p-2 px-8">
@@ -34,12 +37,9 @@ export default function SearchBook() {
               {books.map((book,index) => (
                 <div
                   key={index}
-                  className="relative hover:bg-blue-50 border flex gap-4 items-start border-gray-300 shadow-xs rounded-lg p-4 pt-8"
+                  onClick={() => navigate('/view')}
+                  className=" hover:bg-blue-50 border flex gap-4 items-start border-gray-300 shadow-xs rounded-lg p-4 "
                 >
-                  {/* Status Badge */}
-                  <span className="text-xs font-semibold w-fit py-1 px-2 border-2 rounded-full border-green-500 text-green-500 absolute top-2 right-2">
-                    {book.status}
-                  </span>
 
                   {/* Book Cover */}
                   <div className="shrink-0">
@@ -55,16 +55,22 @@ export default function SearchBook() {
                     <div className="overflow-hidden">
                       <h2 className="font-semibold text-lg line-clamp-2">{book.title}</h2>
                       <p className="text-sm text-gray-600">{book.genre}</p>
-                      <p className="text-sm text-gray-500 line-clamp-3">{book.description}</p>
+                      <p className="text-sm mt-2 text-gray-500 line-clamp-3">{book.description}</p>
                     </div>
 
-                    <div className='flex-center gap-2'>
-                      <Link to={'/view '}>
-                        <button className="anim-btn btn self-start mt-2">View btn</button>
-                      </Link>
+                    <div className="flex w-full font-medium justify-between items-center gap-2 mt-4">
+                      <span className="text-xs font-semibold w-fit py-1 px-2 border-2 rounded-full border-green-500 text-green-500 ">
+                        {book.status}
+                      </span>
 
-                      <button className="anim-btn border-2 font-bold border-blue-500 text-blue-500 text-sm p-2 rounded-lg  self-start mt-2"> borrow btn</button>
+                      <div className='flex gap-1'>
+                          <span className="text-xs text-gray-600">{book.author || "Unknown"}</span>
+                          <span className="text-xs text-gray-600">|</span>
+                          <span className="text-xs text-gray-600">{book.year}</span>
+                      </div>
+
                     </div>
+
                   </div>
                 </div>
               ))}
