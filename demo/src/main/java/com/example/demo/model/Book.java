@@ -17,5 +17,5 @@ public class Book {
     private String genre;
     private String isAvailable;
     private String coverImage;
-    privage String ISBN;
+    private String ISBN;
 }
