@@ -1,4 +1,4 @@
-import {Search,TextAlignJustify,Album,SearchCheck,Dices} from 'lucide-react'
+import {Search,TextAlignJustify,Album,SearchCheck,Dices,X,BookPlus} from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from '../assets/Log.png'
@@ -11,9 +11,18 @@ export default function Home() {
 
   const [Tab,setTab] = useState(1);
 
+  const [hammenu, setHammenu] = useState(false);
+
+  const [AddBookForm, setAddBookForm] = useState(false);
+  
+
+  const handleHamMenu = () => {
+    setHammenu(!hammenu);
+  }
 
   return (
     <div className='' >
+      {AddBookForm && <BookForm close={() => setAddBookForm(false)}/>}
       {/* Header */}
       <div className="flex items-center justify-between gap-24 p-4 px-12">
 
@@ -39,10 +48,12 @@ export default function Home() {
             
         </div>
 
-        <div>
-          <TextAlignJustify className='anim-btn text-gray-400 hover:text-gray-600 ' />
+        <div onClick={handleHamMenu}>
+          {hammenu ? <X  className='anim-btn text-gray-400 hover:text-gray-600 ' /> : <TextAlignJustify className='anim-btn text-gray-400 hover:text-gray-600 ' />}  
+          {hammenu && <SideTab addBook={() => setAddBookForm(true)} />}
         </div>
       </div>
+
 
 
       {/* Body */}
@@ -79,4 +90,156 @@ export default function Home() {
       </div>
     </div>
   )
+}
+
+function SideTab({addBook}){
+  const [isOpen, setIsOpen] = useState(false);
+  return(
+    <div className='absolute z-10 top-13 right-13 flex flex-col gap-2 border-gray-400 shadow-sm bg-white p-4 px-6 rounded-lg'>
+      <h2 className='font-bold text-blue-500 '>Settings</h2>
+      <ul className='w-3xs flex flex-col gap-2'>
+        <li onClick={addBook} className=' flex items-center gap-1 text-sm text-blue-500 font-semibold cursor-pointer hover:bg-gray-50 border-2 border-blue-300 p-2 px-4 rounded-lg'><BookPlus size={18}/>Add Book</li>
+        <li className=' flex items-center gap-1 text-sm text-blue-500 font-semibold cursor-pointer hover:bg-gray-50 border-2 border-blue-300 p-2 px-4 rounded-lg'><BookPlus size={18}/>Add Book</li>
+        <li className=' flex items-center gap-1 text-sm text-blue-500 font-semibold cursor-pointer hover:bg-gray-50 border-2 border-blue-300 p-2 px-4 rounded-lg'><BookPlus size={18}/>Add Book</li>
+      </ul>
+    </div>
+  )
+}
+
+function BookForm({ close }) {
+  const [formData, setFormData] = useState({
+    title: "",
+    author: "",
+    year: "",
+    pages: "",
+    description: "",
+    isAvailable: "", // Auto available
+    genre: "",
+    coverImage: "",// Auto
+    ISBN: "",
+    BorrowedTimes: 0,
+    location: "",
+  });
+
+  // ✅ Handle input changes dynamically
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-full max-w-2xl border border-gray-200 bg-white rounded-2xl p-8 shadow-lg relative">
+        <h2 className="text-2xl font-bold text-blue-500 text-center mb-6">
+          Add New Book
+        </h2>
+
+        <form className="flex flex-col gap-5">
+          {/* Title & Author */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Title
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. The Great Gatsby"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Author
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. F. Scott Fitzgerald"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Year & Pages */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Year Published
+              </label>
+              <input
+                type="date"
+                placeholder="e.g. 1925"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Pages
+              </label>
+              <input
+                type="number"
+                placeholder="e.g. 218"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          {/* ISBN & Availability */}
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                ISBN
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 978-3-16-148410-0"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+          </div>
+
+
+          {/* Description */}
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-600 mb-1">
+              Description
+            </label>
+            <textarea
+              rows="4"
+              placeholder="Enter a short book summary..."
+              className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
+              required
+            ></textarea>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-3 mt-4">
+            <button
+              type="button"
+              onClick={close}
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-sm transition"
+            >
+              Add Book
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

@@ -109,6 +109,7 @@ function Form({ close }) {
         </h2>
 
         {/* Form Fields */}
+        {/* {Add auto Date and Time of borrowdate  the return date is dropdown then auto calculate when is the return date;} */}
         <form className="flex flex-col gap-5">
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-600 mb-1">
