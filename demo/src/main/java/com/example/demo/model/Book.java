@@ -12,8 +12,10 @@ public class Book {
     private String title;
     private String author;
     private String year;
+    private String pages;
     private String description;
     private String genre;
     private String isAvailable;
     private String coverImage;
+    privage String ISBN;
 }
