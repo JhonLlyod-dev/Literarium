@@ -1,5 +1,5 @@
 import {Search,TextAlignJustify,Album,SearchCheck,Dices,X,BookPlus} from 'lucide-react'
-import { useState } from 'react'
+import {  useState,useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from '../assets/Log.png'
 
@@ -19,6 +19,7 @@ export default function Home() {
   const handleHamMenu = () => {
     setHammenu(!hammenu);
   }
+
 
   return (
     <div className='' >
@@ -93,7 +94,6 @@ export default function Home() {
 }
 
 function SideTab({addBook}){
-  const [isOpen, setIsOpen] = useState(false);
   return(
     <div className='absolute z-10 top-13 right-13 flex flex-col gap-2 border-gray-400 shadow-sm bg-white p-4 px-6 rounded-lg'>
       <h2 className='font-bold text-blue-500 '>Settings</h2>
@@ -107,21 +107,26 @@ function SideTab({addBook}){
 }
 
 function BookForm({ close }) {
+ const testAdd = "http://192.168.1.3:8080/books/add";
+
+  const [Shelf, setShelf] = useState("A");
+  const [Section, setSection] = useState("1");
+
   const [formData, setFormData] = useState({
     title: "",
     author: "",
     year: "",
     pages: "",
     description: "",
-    isAvailable: "", // Auto available
+    isAvailable: "true",
     genre: "",
-    coverImage: "",// Auto
-    ISBN: "",
-    BorrowedTimes: 0,
-    location: "",
+    coverImage: "",
+    isbn: "",
+    borrowedTimes: 0,
+    location: "", // will update dynamically
   });
 
-  // ✅ Handle input changes dynamically
+  // Handle input changes dynamically
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -130,36 +135,68 @@ function BookForm({ close }) {
     }));
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="w-full max-w-2xl border border-gray-200 bg-white rounded-2xl p-8 shadow-lg relative">
-        <h2 className="text-2xl font-bold text-blue-500 text-center mb-6">
-          Add New Book
-        </h2>
+  // Update location whenever Shelf or Section changes
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      location: `${Shelf}${Section}`,
+    }));
+  }, [Shelf, Section]);
 
-        <form className="flex flex-col gap-5">
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!formData.coverImage) {
+      formData.coverImage = `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`;
+    }
+
+    fetch(testAdd, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert("Book added successfully!");
+        console.log(data);
+        close();
+      })
+      .catch((err) => alert("Fetch error: " + err));
+  };
+
+  const sections = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+  const shelves = Array.from({ length: 10 }, (_, i) => String.fromCharCode(65 + i)); // A-J
+
+  return (
+    <div className="fixed motion-preset-fade-sm inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-full motion-preset-pop max-w-2xl border border-gray-200 bg-white rounded-2xl p-8 shadow-lg relative">
+        <h2 className="text-2xl font-bold text-blue-500 text-center mb-6">Add New Book</h2>
+
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           {/* Title & Author */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">
-                Title
-              </label>
+              <label className="text-sm font-medium text-gray-600 mb-1">Title</label>
               <input
                 type="text"
+                name="title"
                 placeholder="e.g. The Great Gatsby"
                 className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                value={formData.title}
+                onChange={handleChange}
                 required
               />
             </div>
 
             <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">
-                Author
-              </label>
+              <label className="text-sm font-medium text-gray-600 mb-1">Author</label>
               <input
                 type="text"
+                name="author"
                 placeholder="e.g. F. Scott Fitzgerald"
                 className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                value={formData.author}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -168,58 +205,109 @@ function BookForm({ close }) {
           {/* Year & Pages */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">
-                Year Published
-              </label>
-              <input
-                type="date"
-                placeholder="e.g. 1925"
-                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                required
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">
-                Pages
-              </label>
-              <input
-                type="number"
-                placeholder="e.g. 218"
-                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                required
-              />
-            </div>
-          </div>
-
-          {/* ISBN & Availability */}
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">
-                ISBN
-              </label>
+              <label className="text-sm font-medium text-gray-600 mb-1">Year Published</label>
               <input
                 type="text"
-                placeholder="e.g. 978-3-16-148410-0"
+                name="year"
+                placeholder="e.g. 1925"
                 className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                value={formData.year}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">Pages</label>
+              <input
+                type="number"
+                name="pages"
+                placeholder="e.g. 218"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                value={formData.pages}
+                onChange={handleChange}
                 required
               />
             </div>
           </div>
 
+          {/* ISBN & Genre */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">ISBN</label>
+              <input
+                type="text"
+                name="isbn"
+                placeholder="e.g. 978-3-16-148410-0"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                value={formData.isbn}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">Genre</label>
+              <input
+                type="text"
+                name="genre"
+                placeholder="e.g. Fiction"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                value={formData.genre}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          {/* Section & Shelf */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">Section</label>
+              <select
+                name="section"
+                value={Section}
+                onChange={(e) => setSection(e.target.value)}
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+              >
+                {sections.map((sec) => (
+                  <option key={sec} value={sec}>
+                    {sec}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">Shelf</label>
+              <select
+                name="shelf"
+                value={Shelf}
+                onChange={(e) => setShelf(e.target.value)}
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+              >
+                {shelves.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           {/* Description */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Description
-            </label>
+            <label className="text-sm font-medium text-gray-600 mb-1">Description</label>
             <textarea
               rows="4"
+              name="description"
               placeholder="Enter a short book summary..."
               className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
+              value={formData.description}
+              onChange={handleChange}
               required
-            ></textarea>
+            />
           </div>
+
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 mt-4">
@@ -243,3 +331,5 @@ function BookForm({ close }) {
     </div>
   );
 }
+
+

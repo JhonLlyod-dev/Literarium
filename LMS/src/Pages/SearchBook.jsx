@@ -1,12 +1,42 @@
 
 import { Link, useNavigate } from 'react-router-dom'
 import { ChevronRight,Search } from 'lucide-react'
-import { books } from '../assets/Data'
+import { filterBooks } from '../assets/Filter'
+import { useState, useEffect } from 'react'
+
+
 
 
 export default function SearchBook() {
 
-  const navigate = useNavigate()
+    const [books, setBooks] = useState([]);
+
+    const testGet = "http://192.168.1.3:8080/books/get";
+
+    const loadBooks = async () => {
+      fetch(testGet, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          setBooks(data);
+        })
+        .catch(err => console.error("Fetch error:", err));
+    };
+
+  useEffect(() => {
+    loadBooks();
+  }, []);
+
+  const navigate = useNavigate();
+
+  const [search,setSearch] = useState('');
+  const [isAvailable, setIsAvailable] = useState('All');
+  const filteredBooks = filterBooks(books, search, isAvailable);
   return (
     <div className='flex flex-col gap-4 '>
         <div className="border border-gray-200 shadow-xs text-xs  flex items-center gap-2 w-full p-2 px-8">
@@ -16,35 +46,44 @@ export default function SearchBook() {
 
         <div className='p-4 px-30'>
           <h2 className='text-3xl font-bold text-blue-500'>Search Book</h2>
-          <div className='flex gap-8'>
-            <div className='mt-8 border border-gray-300 p-2 px-4 rounded-md flex-center '>
-              <input  type="text" placeholder='Search for anything...' className='w-2xl outline-0 placeholder:text-gray-400 ' />
+          <div className='flex items-center gap-8 mt-8'>
+
+            <div className=' border border-gray-300 p-2 px-4 rounded-md flex-center '>
+              <input onChange={(e) => setSearch(e.target.value)} value={search}  type="text" placeholder='Search for anything...' className='w-2xl outline-0 placeholder:text-gray-400 ' />
               <button className='text-gray-400 hover:text-gray-600 anim-btn'>
                 <Search size={18} strokeWidth={3}  className=''/>
               </button>
+            </div>
+
+            <div className='border border-gray-300 p-2 rounded-md flex-center'>
+              <select className='outline-0' onChange={(e) => setIsAvailable(e.target.value)} value={isAvailable} name="" id="">
+                <option value="All">All Books</option>
+                <option value="true">Available</option>
+                <option value="false">Unavailable</option>
+              </select>
             </div>
 
 
           </div>
 
             <div className='ml-4 mt-4 flex gap-2 '>
-              <span className='text-gray-600 font-bold'>099</span> 
-              <span>hits</span>
+              <span className='text-gray-600 font-bold'>{filteredBooks.length}</span> 
+              <span>results</span>
             </div>
 
             <div className='mt-8 grid grid-cols-3 gap-4'>
 
-              {books.map((book,index) => (
+              {filteredBooks.map((book,index) => (
                 <div
                   key={index}
-                  onClick={() => navigate('/view')}
+                  onClick={() => navigate(`/view/${book.id}`)}
                   className=" hover:bg-blue-50 border flex gap-4 items-start border-gray-300 shadow-xs rounded-lg p-4 "
                 >
 
                   {/* Book Cover */}
                   <div className="shrink-0">
                     <img
-                      src={`https://picsum.photos/200/300?random=${++index}`}
+                      src={book.coverImage}
                       className="w-30 h-40 bg-amber-200 object-cover rounded"
                       alt="book cover"
                     />
@@ -60,7 +99,7 @@ export default function SearchBook() {
 
                     <div className="flex w-full font-medium justify-between items-center gap-2 mt-4">
                       <span className="text-xs font-semibold w-fit py-1 px-2 border-2 rounded-full border-green-500 text-green-500 ">
-                        {book.status}
+                        {book.isAvailable == "true" ? "Available" : "Unavailable"}
                       </span>
 
                       <div className='flex gap-1'>
