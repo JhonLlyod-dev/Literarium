@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { ChevronRight,ArchiveRestore,SquarePen } from 'lucide-react'
 import { useState,useEffect } from 'react';
 import { useParams,useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
 
 export default function View() {
 
@@ -142,14 +144,14 @@ export default function View() {
             <img src={book.coverImage} className="w-full h-80 object-cover bg-blue-50 rounded-md" alt="Book cover" />
 
               <button onClick={() => setIsOpen(true)} className="btn mt-4 w-full bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 rounded-md py-2">
-                Borrow Book
+                Reserve this Book
               </button>
 
           </div>
 
           {/* Right - Book Details */}
           {Details}
-          {isOpen && <Form close={()  => setIsOpen(false)} />}
+          {isOpen && <Form book={book} close={()  => setIsOpen(false)} />}
           {UpdateBook && <UpdateBookForm load={loadBooks} book={book} close={() => setUpdateBook(false)}/>}
 
         </div>
@@ -159,7 +161,64 @@ export default function View() {
 }
 
 
-function Form({ close }) {
+function Form({ close,book }) {
+
+  const testBorrow = "http://192.168.1.3:8080/borrowedBooks/add";
+
+
+
+
+  const [borrowerName, setBorrowerName] = useState('');
+  const [borrowerAddress, setBorrowerAddress] = useState('');
+  const [borrowerContact, setBorrowerContact] = useState('');
+
+  const [duration, setDuration] = useState('');
+  const [remarks, setRemarks] = useState('');
+
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const shortId = `TXN-${uuidv4().split('-')[0]}`;
+
+    fetch(testBorrow, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: book.title,
+        author: book.author,
+        year: book.year,
+        isbn: book.isbn,
+        coverImage: book.coverImage,
+        status: "Borrowed", //waiting, Borrowed, returned, overdue
+        borrowerName: borrowerName,
+        borrowerAddress: borrowerAddress,
+        borrowerContact: borrowerContact,
+        transactionId: shortId,
+        duration: duration,
+        claimExpiryDate: "N/A",
+        isClaimed: "false",
+        remarks: remarks,
+        borrowDate: "N/A",
+        dueDate: "N/A"
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert("Book borrowed successfully!");
+      loadBooks();
+      close();
+    })
+    .catch((error) => {
+      alert('Error:', error);
+    });
+  }
+  
+
+
   return (
     <div className="motion-preset-fade-sm fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="w-full motion-preset-pop max-w-md border border-gray-200 bg-white rounded-2xl p-6 shadow-lg relative">
@@ -169,13 +228,15 @@ function Form({ close }) {
 
         {/* Form Fields */}
         {/* {Add auto Date and Time of borrowdate  the return date is dropdown then auto calculate when is the return date;} */}
-        <form className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-600 mb-1">
               Full Name
             </label>
             <input
               type="text"
+              onChange={(e) => setBorrowerName(e.target.value)}
+              value={borrowerName}
               placeholder="e.g. Juan Dela Cruz"
               className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
               required
@@ -188,6 +249,8 @@ function Form({ close }) {
             </label>
             <input
               type="text"
+              onChange={(e) => setBorrowerAddress(e.target.value)}
+              value={borrowerAddress}
               placeholder="e.g. Cagayan de Oro City"
               className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
               required
@@ -200,10 +263,23 @@ function Form({ close }) {
             </label>
             <input
               type="text"
+              onChange={(e) => setBorrowerContact(e.target.value)}
+              value={borrowerContact}
               placeholder="e.g. 09123456789"
               className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
               required
             />
+          </div>
+
+          <div className='flex flex-col'>
+            <label className="text-sm font-medium text-gray-600 mb-1">
+              Borrow Duration 
+            </label>
+            <select value={duration} onChange={(e)=> setDuration(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
+              {[1,2,3,4,5,6,7].map((item) => (
+                <option value={item}>{item} days</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col">
@@ -212,6 +288,8 @@ function Form({ close }) {
             </label>
             <textarea
               rows="3"
+              onChange={(e) => setRemarks(e.target.value)}
+              value={remarks}
               placeholder="Additional notes (optional)..."
               className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
             ></textarea>

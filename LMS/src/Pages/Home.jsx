@@ -1,6 +1,6 @@
 import {Search,TextAlignJustify,Album,SearchCheck,Dices,X,BookPlus} from 'lucide-react'
 import {  useState,useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link,useNavigate } from 'react-router-dom'
 import Logo from '../assets/Log.png'
 
 import BorrowedDue from '../Components/BorrowedDue'
@@ -15,10 +15,13 @@ export default function Home() {
 
   const [AddBookForm, setAddBookForm] = useState(false);
   
+  const [search,setSearch] = useState('');
 
   const handleHamMenu = () => {
     setHammenu(!hammenu);
   }
+
+  const navigate = useNavigate();
 
 
   return (
@@ -38,8 +41,8 @@ export default function Home() {
 
         <div className='flex-center gap-8'>
             <div className='border border-gray-300 p-2 px-4 rounded-md flex-center '>
-              <input  type="text" placeholder='Search for anything...' className='w-[400px] outline-0 placeholder:text-gray-400 ' />
-              <button className='text-gray-400 hover:text-gray-600 anim-btn'>
+              <input onChange={(e) => setSearch(e.target.value)} value={search}  type="text" placeholder='Search for anything...' className='w-[400px] outline-0 placeholder:text-gray-400 ' />
+              <button onClick={() => navigate(`/search/${search}`)} className='text-gray-400 hover:text-gray-600 anim-btn'>
                 <Search size={18} strokeWidth={3}  className=''/>
               </button>
             </div>
@@ -79,7 +82,7 @@ export default function Home() {
 
             <div onClick={() => setTab((4))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 4 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
               <Dices size={60} strokeWidth={40} className='bg-blue-200 text-blue-600 p-4 rounded-lg' />
-              <h2 className='text-2xl text-blue-500'>Waiting list</h2>
+              <h2 className='text-2xl text-blue-500'>Expiring today</h2>
             </div>
 
           </div>

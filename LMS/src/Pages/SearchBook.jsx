@@ -1,5 +1,5 @@
 
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ChevronRight,Search } from 'lucide-react'
 import { filterBooks } from '../assets/Filter'
 import { useState, useEffect } from 'react'
@@ -34,7 +34,14 @@ export default function SearchBook() {
 
   const navigate = useNavigate();
 
+  const { query } = useParams();
+
   const [search,setSearch] = useState('');
+  
+  useEffect(() => {
+    if (query) setSearch(query);
+  }, [query]);
+
   const [isAvailable, setIsAvailable] = useState('All');
   const filteredBooks = filterBooks(books, search, isAvailable);
   return (
@@ -55,8 +62,8 @@ export default function SearchBook() {
               </button>
             </div>
 
-            <div className='border border-gray-300 p-2 rounded-md flex-center'>
-              <select className='outline-0' onChange={(e) => setIsAvailable(e.target.value)} value={isAvailable} name="" id="">
+            <div className='border border-gray-300 rounded-md px-2 flex-center'>
+              <select className='outline-0 p-2'  onChange={(e) => setIsAvailable(e.target.value)} value={isAvailable} name="" id="">
                 <option value="All">All Books</option>
                 <option value="true">Available</option>
                 <option value="false">Unavailable</option>
