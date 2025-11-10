@@ -18,4 +18,6 @@ public class Book {
     private String isAvailable;
     private String coverImage;
     private String ISBN;
+    private String borrowedTimes;
+    private String location;
 }
