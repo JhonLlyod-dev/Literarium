@@ -1,0 +1,4 @@
+.BGgradient {
+  background-image: linear-gradient(to left bottom, #fdfbfb, #faf8f9, #f7f5f7, #f4f3f4, #f0f0f2, #eeeff2, #eceff2, #e9eef1, #e8eff3, #e6f0f5, #e5f1f7, #e3f2f9);
+  height: 100dvh;
+}
