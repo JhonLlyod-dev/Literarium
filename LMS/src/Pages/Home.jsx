@@ -124,6 +124,7 @@ function BookForm({ close }) {
     genre: "",
     coverImage: "",
     isbn: "",
+    currentBorrowerId: "N/A",
     borrowedTimes: 0,
     location: "", // will update dynamically
   });
