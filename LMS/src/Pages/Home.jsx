@@ -110,7 +110,6 @@ function SideTab({addBook}){
 }
 
 function BookForm({ close }) {
- const testAdd = "http://192.168.1.3:8080/books/add";
 
   const [Shelf, setShelf] = useState("A");
   const [Section, setSection] = useState("1");
@@ -153,7 +152,7 @@ function BookForm({ close }) {
       formData.coverImage = `https://picsum.photos/200/300?random=${Math.floor(Math.random() * 1000)}`;
     }
 
-    fetch(testAdd, {
+    fetch('/books/add', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),

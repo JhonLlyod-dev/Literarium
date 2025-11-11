@@ -17,10 +17,9 @@ export default function View() {
 
   const navigate = useNavigate();
 
-  const testGet = "http://192.168.1.3:8080/books/getbook/"+id;
 
   const loadBooks = async () => {
-    fetch(testGet, {
+    fetch(`/books/getbook/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -38,9 +37,8 @@ export default function View() {
     loadBooks();
   }, []);
 
-  const testDelete = "http://192.168.1.3:8080/books/delete/"+id;
   const deleteBook = async () => {
-      fetch(`${testDelete}`, {
+      fetch(`/books/delete/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +149,7 @@ export default function View() {
 
           {/* Right - Book Details */}
           {Details}
-          {isOpen && <Form book={book} close={()  => setIsOpen(false)} />}
+          {isOpen && <Form book={book} close={()  => setIsOpen(false)} loadBooks={loadBooks} />}
           {UpdateBook && <UpdateBookForm load={loadBooks} book={book} close={() => setUpdateBook(false)}/>}
 
         </div>
@@ -161,11 +159,7 @@ export default function View() {
 }
 
 
-function Form({ close,book }) {
-
-  const testBorrow = "http://192.168.1.3:8080/borrowedBooks/add";
-
-
+function Form({ close,book,loadBooks }) {
 
 
   const [borrowerName, setBorrowerName] = useState('');
@@ -182,7 +176,7 @@ function Form({ close,book }) {
 
     const shortId = `TXN-${uuidv4().split('-')[0]}`;
 
-    fetch(testBorrow, {
+    fetch(`/borrow/add`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -206,7 +200,6 @@ function Form({ close,book }) {
         dueDate: "N/A"
       })
     })
-    .then(response => response.json())
     .then(data => {
       alert("Book borrowed successfully!");
       loadBooks();
@@ -277,7 +270,7 @@ function Form({ close,book }) {
             </label>
             <select value={duration} onChange={(e)=> setDuration(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
               {[1,2,3,4,5,6,7].map((item) => (
-                <option value={item}>{item} days</option>
+                <option key={item} value={item}>{item} days</option>
               ))}
             </select>
           </div>
@@ -355,12 +348,11 @@ function Form({ close,book }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit updated data
-  const testUpdate = `http://192.168.1.3:8080/books/update/${book.id}`;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(testUpdate, {
+      const response = await fetch(`/books/update/${book.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

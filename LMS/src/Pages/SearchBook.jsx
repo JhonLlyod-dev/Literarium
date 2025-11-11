@@ -5,16 +5,12 @@ import { filterBooks } from '../assets/Filter'
 import { useState, useEffect } from 'react'
 
 
-
-
 export default function SearchBook() {
 
     const [books, setBooks] = useState([]);
 
-    const testGet = "http://192.168.1.3:8080/books/get";
-
     const loadBooks = async () => {
-      fetch(testGet, {
+      fetch('/books/get', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

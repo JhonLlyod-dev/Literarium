@@ -10,10 +10,15 @@ export default defineConfig({
     port: 3001,
     host: true,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080/Books',
+      '/books': {
+        target: 'http://localhost:8080/books',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/books/, ''),
+      },
+      '/borrow': {
+        target: 'http://localhost:8080/borrowedBooks',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/borrow/, ''),
       },
     },
   },
