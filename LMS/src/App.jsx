@@ -17,7 +17,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/search/:query?' element={<SearchBook/>}/>
-        <Route path='/view/:id?' element={<View/>}/>
+        <Route path='/view/:isbn?' element={<View/>}/>
       </Routes>
 
     </Router>

@@ -82,7 +82,7 @@ export default function Home() {
 
             <div onClick={() => setTab((4))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 4 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
               <Dices size={60} strokeWidth={40} className='bg-blue-200 text-blue-600 p-4 rounded-lg' />
-              <h2 className='text-2xl text-blue-500'>Expiring today</h2>
+              <h2 className='text-2xl text-blue-500'>to be claimed</h2>
             </div>
 
           </div>
@@ -125,7 +125,6 @@ function BookForm({ close }) {
     coverImage: "",
     isbn: "",
     currentBorrowerId: "N/A",
-    borrowedTimes: 0,
     location: "", // will update dynamically
   });
 

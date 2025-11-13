@@ -79,7 +79,7 @@ export default function SearchBook() {
               {filteredBooks.map((book,index) => (
                 <div
                   key={index}
-                  onClick={() => navigate(`/view/${book.id}`)}
+                  onClick={() => navigate(`/view/${book.isbn}`)}
                   className=" hover:bg-blue-50 border flex gap-4 items-start border-gray-300 shadow-xs rounded-lg p-4 "
                 >
 

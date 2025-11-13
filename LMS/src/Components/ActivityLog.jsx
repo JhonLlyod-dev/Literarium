@@ -1,17 +1,38 @@
 import { books } from "../assets/Data";
 import dayjs from "dayjs";
 import { Album } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { filterLog } from "../assets/Filter";
+import {formatLocalDateTime} from "../assets/Dateformat";
 
 export default function ActivityLog() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterDate, setFilterDate] = useState("");
-  // Filter only Borrowed or Returned books
-  const activityBooks = books.filter(
-    (book) =>
-      book.status === "Borrowed" || book.status === "Returned"
-  );
+  
+    const [log, setLog] = useState([]);
+
+    const filtered = filterLog(log,searchTerm,filterDate);
+
+
+  const getLog = async () => {
+    fetch ("/borrow/getReturned", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setLog(data);
+        console.log(data);
+      })
+      .catch((err) => console.error("Fetch error:", err));
+  }
+
+  useEffect(() => {
+    getLog();
+  }, []);
 
   return (
     <div className="mt-4 flex-center gap-4 w-full p-4 px-8">
@@ -48,8 +69,8 @@ export default function ActivityLog() {
           </thead>
 
           <tbody>
-            {activityBooks.length > 0 ? (
-              activityBooks.map((book, index) => (
+            {filtered.length > 0 ? (
+              filtered.map((book, index) => (
                 <tr
                   key={index}
                   className="border-b border-gray-100 hover:bg-blue-50 transition"
@@ -66,17 +87,33 @@ export default function ActivityLog() {
                     <div className="flex flex-col">
                       <span className="font-semibold">{book.title}</span>
                       <span className="text-xs text-gray-500 italic">
-                        {book.genre}
+                        {book.author}
                       </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">{book.borrowerName}</td>
-                  <td className="px-4 py-3">{book.transactionID}</td>
+                  <td className="px-4 py-3">{book.transactionId}</td>
                   <td className="px-4 py-3 text-gray-600">
-                    {book.borrowedDate || "—"}
+                    {(() => {
+                      const dateTime = formatLocalDateTime(book.borrowDate);
+                      return (
+                        <div className="flex flex-col items-start">
+                          <span>{dateTime.date}</span>
+                          <span>{dateTime.time}</span>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {book.returnDate || "—"}
+                    {(() => {
+                      const dateTime = formatLocalDateTime(book.returnedDate);
+                      return (
+                        <div className="flex flex-col items-start">
+                          <span>{dateTime.date}</span>
+                          <span>{dateTime.time}</span>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span

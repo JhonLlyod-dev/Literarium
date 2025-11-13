@@ -3,13 +3,13 @@ import { ChevronRight,ArchiveRestore,SquarePen } from 'lucide-react'
 import { useState,useEffect } from 'react';
 import { useParams,useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import dayjs from 'dayjs';
+import { formatLocalDateTime } from '../assets/Dateformat';
 
 export default function View() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const {id} = useParams();
+  const {isbn} = useParams();
 
   const [book, setBook] = useState({});
 
@@ -17,9 +17,11 @@ export default function View() {
 
   const navigate = useNavigate();
 
+  const [filteredBooks, setFilteredBooks] = useState([]);
+
 
   const loadBooks = async () => {
-    fetch(`/books/getbook/${id}`, {
+    fetch(`/books/getbook/${isbn}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -29,9 +31,24 @@ export default function View() {
       .then(data => {
         console.log(data);
         setBook(data);
+        loadQueue(data.isbn);
       })
       .catch(err => console.error("Fetch error:", err));
   };
+
+  const loadQueue = async (isbn) => {
+    fetch(`/borrow/queue/${isbn}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setFilteredBooks(data);
+      })
+      .catch(err => console.error("Fetch error:", err));
+  } 
 
   useEffect(() => {
     loadBooks();
@@ -50,6 +67,38 @@ export default function View() {
         })
         .catch(err => alert("Fetch error:", err));
     };
+
+  const returnBook = async () => {
+    fetch(`/borrow/returnBook`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({isbn: book.isbn}),
+    })
+      .then(data => {
+        alert(" Book returned successfully!");
+        loadBooks();
+      })
+      .catch(err => alert("Fetch error:", err));
+  }; 
+
+  const transactionId = "asdawd";
+  const pickUp = async () => {
+    fetch(`/borrow/pickUp/${transactionId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(data => {
+        alert(" Book picked up successfully!");
+        loadBooks();
+      })
+      .catch(err => alert("Fetch error:", err));
+  };
+
+
 
 
 
@@ -153,7 +202,103 @@ export default function View() {
           {UpdateBook && <UpdateBookForm load={loadBooks} book={book} close={() => setUpdateBook(false)}/>}
 
         </div>
+
+        <div className="mt-4 flex-center flex-col  gap-8 border border-gray-300 rounded-lg p-8 shadow-sm bg-white">
+          <div className='grid grid-cols-3  w-full '>
+            <div >
+              <button onClick={returnBook} className='btn anim-btn px-8'>
+                Return Book
+              </button>
+            </div>
+              <h2 className='font-bold text-2xl text-center'>Borrower Queue</h2>
+            <div className='flex justify-end' >
+              <button onClick={pickUp} className='btn anim-btn px-8 bg-green-500 hover:bg-green-600'>
+                Pickup Book
+              </button>
+            </div>
+          </div>
+          <table className="w-full text-sm text-left text-gray-700">
+            <thead className="bg-blue-100 text-blue-700 uppercase text-xs font-semibold">
+              <tr>
+                <th className="px-4 py-3">#</th>
+                <th className="px-4 py-3">Book Title</th>
+                <th className="px-4 py-3">Borrower Name</th>
+                <th className="px-4 py-3">Transaction ID</th>
+                <th className="px-4 py-3">Borrowed Date</th>
+                <th className="px-4 py-3">Due Date</th>
+                <th className="px-4 py-3 text-center">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredBooks.length > 0 ? (
+                filteredBooks.map((book, index) => (
+                  <tr
+                    key={index}
+                    className={`${book.status == "Borrowed" && "bg-green-200" } border-b border-gray-100 hover:bg-blue-50 transition`}
+                  >
+                    <td className="px-4 py-3 font-medium text-gray-600">
+                      {index + 1}
+                    </td>
+                    <td className="px-4 py-3 flex items-center gap-2">
+                      <img
+                        src={book.coverImage}
+                        alt="Book cover"
+                        className="w-10 h-14 object-cover rounded"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{book.title}</span>
+                        <span className="text-xs text-gray-500 italic">
+                          {book.author}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">{book.borrowerName}</td>
+                    <td className="px-4 py-3">{book.transactionId}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {(() => {
+                        const dateTime = formatLocalDateTime(book.borrowDate);
+                        return (
+                          <div className="flex flex-col items-start">
+                            <span>{dateTime.date}</span>
+                            <span>{dateTime.time}</span>
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {(() => {
+                        const dateTime = formatLocalDateTime(book.dueDate);
+                        return (
+                          <div className="flex flex-col items-start">
+                            <span>{dateTime.date}</span>
+                            <span>{dateTime.time}</span>
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">
+                        {book.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="text-center text-gray-500 py-6 italic"
+                  >
+                    No borrowed books found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   )
 }
@@ -186,18 +331,13 @@ function Form({ close,book,loadBooks }) {
         author: book.author,
         year: book.year,
         isbn: book.isbn,
-        coverImage: book.coverImage,
-        status: "Borrowed", //waiting, Borrowed, returned, overdue
+        coverImage: book.coverImage, //waiting, Borrowed, returned, overdue
         borrowerName: borrowerName,
         borrowerAddress: borrowerAddress,
         borrowerContact: borrowerContact,
         transactionId: shortId,
         duration: duration,
-        claimExpiryDate: "N/A",
-        isClaimed: "false",
         remarks: remarks,
-        borrowDate: "N/A",
-        dueDate: "N/A"
       })
     })
     .then(data => {
