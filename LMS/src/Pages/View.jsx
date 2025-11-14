@@ -4,6 +4,7 @@ import { useState,useEffect } from 'react';
 import { useParams,useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { formatLocalDateTime } from '../assets/Dateformat';
+import { statusStyles } from '../assets/Filter';
 
 export default function View() {
 
@@ -83,22 +84,22 @@ export default function View() {
       .catch(err => alert("Fetch error:", err));
   }; 
 
-  const transactionId = "asdawd";
-  const pickUp = async () => {
-    fetch(`/borrow/pickUp/${transactionId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(data => {
-        alert(" Book picked up successfully!");
-        loadBooks();
-      })
-      .catch(err => alert("Fetch error:", err));
-  };
+
+const [pickUpModal, setPickUpModal] = useState(false);
+const [selectedBook, setSelectedBook] = useState(null);
+
+function handleOpen(book) {
+  setSelectedBook(book);
+  setPickUpModal(true);
+}
+
+function handleClose() {
+  setPickUpModal(false);
+  setSelectedBook(null);
+}
 
 
+const [cancelModal, setCancelModal] = useState(false);
 
 
 
@@ -168,6 +169,7 @@ export default function View() {
         <ChevronRight size={15} />
         <span className="text-gray-600 hover:text-gray-800 hover:underline font-medium ">View Book</span>
       </div>
+      
 
       {/* Main Content */}
       <div className="p-4 px-20">
@@ -200,6 +202,7 @@ export default function View() {
           {Details}
           {isOpen && <Form book={book} close={()  => setIsOpen(false)} loadBooks={loadBooks} />}
           {UpdateBook && <UpdateBookForm load={loadBooks} book={book} close={() => setUpdateBook(false)}/>}
+          {cancelModal && <CancelForm close={() => setCancelModal(false)} loadBooks={loadBooks} book={book}/>}
 
         </div>
 
@@ -211,12 +214,14 @@ export default function View() {
               </button>
             </div>
               <h2 className='font-bold text-2xl text-center'>Borrower Queue</h2>
-            <div className='flex justify-end' >
-              <button onClick={pickUp} className='btn anim-btn px-8 bg-green-500 hover:bg-green-600'>
-                Pickup Book
+            <div className='flex-center justify-end'>
+              <button onClick={() => setCancelModal(true)} className='btn anim-btn bg-red-500 hover:bg-red-600'>
+                Cancel Reservation
               </button>
             </div>
           </div>
+
+          {selectedBook?.status === "Reserved – Pick Up" && pickUpModal && <PickupBook book={selectedBook} close={() => handleClose()} loadBooks={loadBooks}/>}
           <table className="w-full text-sm text-left text-gray-700">
             <thead className="bg-blue-100 text-blue-700 uppercase text-xs font-semibold">
               <tr>
@@ -235,8 +240,10 @@ export default function View() {
                 filteredBooks.map((book, index) => (
                   <tr
                     key={index}
+                    onClick={() => handleOpen(book)}
                     className={`${book.status == "Borrowed" && "bg-green-200" } border-b border-gray-100 hover:bg-blue-50 transition`}
                   >
+                    
                     <td className="px-4 py-3 font-medium text-gray-600">
                       {index + 1}
                     </td>
@@ -278,7 +285,7 @@ export default function View() {
                       })()}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">
+                      <span className={`${statusStyles[book.status]} px-2 py-1 rounded-full text-xs font-medium`}>
                         {book.status}
                       </span>
                     </td>
@@ -302,6 +309,89 @@ export default function View() {
     </div>
   )
 }
+
+
+function CancelForm({ close, loadBooks, book }) {
+  const [transactionId, setTransactionId] = useState("");
+
+  const cancelReservation = async (e) => {
+    e.preventDefault(); // get event
+    fetch(`/borrow/cancel`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({isbn: book.isbn, transactionId: transactionId}), // or add { isbn: book.isbn } if you have book object
+    })
+      .then((data) => {
+        alert("Reservation cancelled successfully!");
+        loadBooks();
+        close();
+      })
+      .catch((err) => alert("Fetch error: " + err));
+  };
+
+  return (
+    <div className="motion-preset-fade-sm fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-full motion-preset-pop max-w-md border border-gray-200 bg-white rounded-2xl p-6 shadow-lg relative">
+        {/* Header */}
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+          Cancel Transaction
+        </h2>
+        <p className="text-gray-500 mb-6">
+          Enter the transaction ID below to cancel a borrowing transaction.
+        </p>
+
+        {/* Form */}
+        <form className="space-y-4" onSubmit={cancelReservation}>
+          <div>
+            <label
+              htmlFor="transactionId"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Transaction ID
+            </label>
+            <input
+              type="text"
+              id="transactionId"
+              name="transactionId"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+              placeholder="e.g. TXN-486bfdd0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              onClick={close}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold shadow-sm transition"
+            >
+              Confirm Cancel
+            </button>
+          </div>
+        </form>
+
+        {/* Footer note */}
+        <div className="mt-4 text-sm text-gray-500 italic">
+          Make sure the transaction ID is correct before confirming cancellation.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
 
 
 function Form({ close,book,loadBooks }) {
@@ -433,14 +523,14 @@ function Form({ close,book,loadBooks }) {
             <button
               type="button"
               onClick={close}
-              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              className="anim-btn btn bg-red-500 hover:bg-red-600"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-sm transition"
+              className="anim-btn btn"
             >
               Confirm
             </button>
@@ -640,14 +730,14 @@ function Form({ close,book,loadBooks }) {
             <button
               type="button"
               onClick={close}
-              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              className="anim-btn btn bg-red-500 hover:bg-red-600"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-sm transition"
+              className="anim-btn btn"
             >
               Update Book
             </button>
@@ -657,4 +747,85 @@ function Form({ close,book,loadBooks }) {
     </div>
   );
 }
+
+
+
+function PickupBook({ book, close, loadBooks }) {
+  const transactionId = book.transactionId; // ✅ use actual book transactionId
+
+  const pickUp = async () => {
+    fetch(`/borrow/pickUp/${transactionId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        alert("Book picked up successfully!");
+        loadBooks();
+        close(); // ✅ close modal after success
+      })
+      .catch(err => alert("Fetch error:", err));
+  };
+
+  return (
+    <div className="motion-preset-fade-sm fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-full motion-preset-pop max-w-2xl border border-gray-200 bg-white rounded-2xl p-8 shadow-lg relative">
+
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold text-gray-800">Pickup Book</h2>
+          <h3 className="text-blue-500 text-xl font-bold">{book.transactionId}</h3>
+        </div>
+
+        <p className="text-gray-600 mb-6">Please review the book and borrower details before confirming pickup:</p>
+
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">Book Details</h3>
+          <div className="flex items-start gap-5">
+            <img
+              src={book.coverImage}
+              alt={book.title}
+              className="w-24 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
+            />
+            <div className="flex flex-col gap-2 text-gray-700">
+              <p><span className="font-semibold text-gray-800">Title:</span> {book.title}</p>
+              <p><span className="font-semibold text-gray-800">Author:</span> {book.author}</p>
+              <p><span className="font-semibold text-gray-800">ISBN:</span> {book.isbn}</p>
+              <p><span className="font-semibold text-gray-800">Year:</span> {book.year}</p>
+            </div>
+          </div>
+        </div>
+
+
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">Borrower Details</h3>
+          <div className="flex flex-col gap-2 text-gray-700">
+            <p><span className="font-semibold text-gray-800">Name:</span> {book.borrowerName}</p>
+            <p><span className="font-semibold text-gray-800">Contact #:</span> {book.borrowerContact}</p>
+            <p><span className="font-semibold text-gray-800">Address:</span> {book.borrowerAddress}</p>
+          </div>
+        </div>
+
+
+        <div className="flex justify-end gap-3 ">
+          <button
+            onClick={close}
+            className="anim-btn btn bg-red-500 hover:bg-red-600"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={pickUp}
+            className="anim-btn btn "
+          >
+            Confirm Pickup
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  );
+}
+
 

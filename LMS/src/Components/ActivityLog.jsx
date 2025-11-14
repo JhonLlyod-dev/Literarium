@@ -4,6 +4,7 @@ import { Album } from "lucide-react";
 import { useEffect, useState } from "react";
 import { filterLog } from "../assets/Filter";
 import {formatLocalDateTime} from "../assets/Dateformat";
+import { statusStyles } from "../assets/Filter";
 
 export default function ActivityLog() {
 
@@ -106,7 +107,7 @@ export default function ActivityLog() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {(() => {
-                      const dateTime = formatLocalDateTime(book.returnedDate);
+                      const dateTime = formatLocalDateTime(book.returnDate);
                       return (
                         <div className="flex flex-col items-start">
                           <span>{dateTime.date}</span>
@@ -117,11 +118,7 @@ export default function ActivityLog() {
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        book.status === "Borrowed"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[book.status]}`}
                     >
                       {book.status}
                     </span>

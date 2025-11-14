@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { filterBorrow} from "../assets/Filter";
 import {formatLocalDateTime} from "../assets/Dateformat";
 import { useNavigate } from "react-router-dom";
+import { statusStyles } from "../assets/Filter";
 
 export default function BorrowedList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,7 +127,7 @@ export default function BorrowedList() {
                     })()}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">
+                    <span className={`${statusStyles[book.status]} px-2 py-1 rounded-full text-xs font-medium`}>
                       {book.status}
                     </span>
                   </td>

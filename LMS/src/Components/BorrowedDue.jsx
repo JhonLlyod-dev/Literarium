@@ -3,6 +3,7 @@ import { Album } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import {formatLocalDateTime} from "../assets/Dateformat";
+import { statusStyles } from "../assets/Filter";
 
 export default function BorrowedDue() {
   const currentDate = dayjs().format('MMMM D, YYYY');
@@ -101,7 +102,7 @@ export default function BorrowedDue() {
                     })()}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">
+                    <span className={`${statusStyles[book.status]} bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium`}>
                       {book.status}
                     </span>
                   </td>

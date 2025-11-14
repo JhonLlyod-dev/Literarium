@@ -11,15 +11,9 @@ export default function Home() {
 
   const [Tab,setTab] = useState(1);
 
-  const [hammenu, setHammenu] = useState(false);
-
   const [AddBookForm, setAddBookForm] = useState(false);
   
   const [search,setSearch] = useState('');
-
-  const handleHamMenu = () => {
-    setHammenu(!hammenu);
-  }
 
   const navigate = useNavigate();
 
@@ -52,10 +46,7 @@ export default function Home() {
             
         </div>
 
-        <div onClick={handleHamMenu}>
-          {hammenu ? <X  className='anim-btn text-gray-400 hover:text-gray-600 ' /> : <TextAlignJustify className='anim-btn text-gray-400 hover:text-gray-600 ' />}  
-          {hammenu && <SideTab addBook={() => setAddBookForm(true)} />}
-        </div>
+        <button onClick={() => setAddBookForm(true)} className='anim-btn btn flex-center gap-1'><BookPlus size={18}/>Add Book</button>
       </div>
 
 
@@ -96,18 +87,7 @@ export default function Home() {
   )
 }
 
-function SideTab({addBook}){
-  return(
-    <div className='absolute z-10 top-13 right-13 flex flex-col gap-2 border-gray-400 shadow-sm bg-white p-4 px-6 rounded-lg'>
-      <h2 className='font-bold text-blue-500 '>Settings</h2>
-      <ul className='w-3xs flex flex-col gap-2'>
-        <li onClick={addBook} className=' flex items-center gap-1 text-sm text-blue-500 font-semibold cursor-pointer hover:bg-gray-50 border-2 border-blue-300 p-2 px-4 rounded-lg'><BookPlus size={18}/>Add Book</li>
-        <li className=' flex items-center gap-1 text-sm text-blue-500 font-semibold cursor-pointer hover:bg-gray-50 border-2 border-blue-300 p-2 px-4 rounded-lg'><BookPlus size={18}/>Add Book</li>
-        <li className=' flex items-center gap-1 text-sm text-blue-500 font-semibold cursor-pointer hover:bg-gray-50 border-2 border-blue-300 p-2 px-4 rounded-lg'><BookPlus size={18}/>Add Book</li>
-      </ul>
-    </div>
-  )
-}
+
 
 function BookForm({ close }) {
 
@@ -316,14 +296,14 @@ function BookForm({ close }) {
             <button
               type="button"
               onClick={close}
-              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              className="anim-btn btn bg-red-500 hover:bg-red-600"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-sm transition"
+              className="anim-btn btn"
             >
               Add Book
             </button>
