@@ -30,7 +30,6 @@ export default function View() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data);
         setBook(data);
         loadQueue(data.isbn);
       })
@@ -401,7 +400,7 @@ function Form({ close,book,loadBooks }) {
   const [borrowerAddress, setBorrowerAddress] = useState('');
   const [borrowerContact, setBorrowerContact] = useState('');
 
-  const [duration, setDuration] = useState('');
+  const [duration, setDuration] = useState(0);
   const [remarks, setRemarks] = useState('');
 
 
@@ -410,6 +409,23 @@ function Form({ close,book,loadBooks }) {
     e.preventDefault();
 
     const shortId = `TXN-${uuidv4().split('-')[0]}`;
+
+    const obj = {
+        title: book.title,
+        author: book.author,
+        year: book.year,
+        isbn: book.isbn,
+        coverImage: book.coverImage, //waiting, Borrowed, returned, overdue
+        borrowerName: borrowerName,
+        borrowerAddress: borrowerAddress,
+        borrowerContact: borrowerContact,
+        transactionId: shortId,
+        duration: duration,
+        remarks: remarks,
+      }
+
+      console.log(obj);
+
 
     fetch(`/borrow/add`, {
       method: 'POST',
