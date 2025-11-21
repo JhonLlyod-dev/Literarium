@@ -1,4 +1,4 @@
-import {Search,TextAlignJustify,Album,SearchCheck,Dices,X,BookPlus} from 'lucide-react'
+import {Search,TextAlignJustify,Album,HandCoins,History,Clock8,BookPlus} from 'lucide-react'
 import {  useState,useEffect } from 'react'
 import { Link,useNavigate } from 'react-router-dom'
 import Logo from '../assets/Log.png'
@@ -7,6 +7,7 @@ import BorrowedDue from '../Components/BorrowedDue'
 import WaitingList from '../Components/WaitingList'
 import BorrowedList from '../Components/BorrowedList'
 import ActivityLog from '../Components/ActivityLog'
+import Payment from '../Components/Payments'
 export default function Home() {
 
   const [Tab,setTab] = useState(1);
@@ -55,25 +56,30 @@ export default function Home() {
       <div className='mt-4 flex flex-col w-full'>
 
 
-          <div className='grid grid-cols-4 gap-10 w-full px-20 mt-4'>
+          <div className='grid grid-cols-5 gap-10 w-full px-20 mt-4'>
             <div onClick={() => setTab((1))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 1 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
-              <Album  size={60} className='bg-blue-200 text-blue-600 p-4 rounded-lg' />
-              <h2 className='text-2xl text-blue-500'>Home</h2>
+              <Album  size={40} className='bg-blue-200 text-blue-600 p-2 rounded-lg' />
+              <h2 className='text-xl text-blue-500'>Home</h2>
             </div>
 
             <div onClick={() => setTab((2))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 2 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
-              <Album  size={60} className='bg-blue-200 text-blue-600 p-4 rounded-lg' />
-              <h2 className='text-2xl text-blue-500'>Borrowed </h2>
+              <Album  size={40} className='bg-blue-200 text-blue-600 p-2 rounded-lg' />
+              <h2 className='text-xl text-blue-500'>Borrowed </h2>
             </div>
 
             <div onClick={() => setTab((3))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 3 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
-              <SearchCheck  size={60} className='bg-blue-200 text-blue-600 p-4 rounded-lg' />
-              <h2 className='text-2xl text-blue-500'>Activity Log</h2>
+              <History  size={40} className='bg-blue-200 text-blue-600 p-2 rounded-lg' />
+              <h2 className='text-xl text-blue-500'>Activities</h2>
             </div>
 
             <div onClick={() => setTab((4))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 4 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
-              <Dices size={60} strokeWidth={40} className='bg-blue-200 text-blue-600 p-4 rounded-lg' />
-              <h2 className='text-2xl text-blue-500'>to be claimed</h2>
+              <Clock8 size={40}  className='bg-blue-200 text-blue-600 p-2 rounded-lg' />
+              <h2 className='text-xl text-blue-500'>Awaiting</h2>
+            </div>
+
+            <div onClick={() => setTab((5))} className={`anim-btn cursor-pointer hover:bg-gray-50 ${Tab === 5 ? 'bg-blue-100' : ''}  p-4 flex items-center  gap-2 border border-gray-200 rounded-lg shadow-sm  font-bold`}>
+              <HandCoins size={40}  className='bg-blue-200 text-blue-600 p-2 rounded-lg' />
+              <h2 className='text-xl text-blue-500'>Payments</h2>
             </div>
 
           </div>
@@ -81,6 +87,7 @@ export default function Home() {
            {Tab === 2 && <BorrowedList/>}
            {Tab === 3 && <ActivityLog/>}
            {Tab === 4 && <WaitingList/>}
+           {Tab === 5 && <Payment/>}
 
       </div>
     </div>

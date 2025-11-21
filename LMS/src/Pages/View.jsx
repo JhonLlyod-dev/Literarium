@@ -5,6 +5,7 @@ import { useParams,useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { formatLocalDateTime } from '../assets/Dateformat';
 import { statusStyles } from '../assets/Filter';
+import { ValidID } from '../assets/Data';
 
 export default function View() {
 
@@ -54,6 +55,7 @@ export default function View() {
     loadBooks();
   }, []);
 
+
   const deleteBook = async () => {
       fetch(`/books/delete/${id}`, {
         method: 'DELETE',
@@ -68,31 +70,25 @@ export default function View() {
         .catch(err => alert("Fetch error:", err));
     };
 
-  const returnBook = async () => {
-    fetch(`/borrow/returnBook`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({isbn: book.isbn}),
-    })
-      .then(data => {
-        alert(" Book returned successfully!");
-        loadBooks();
-      })
-      .catch(err => alert("Fetch error:", err));
-  }; 
-
 
 const [pickUpModal, setPickUpModal] = useState(false);
 const [selectedBook, setSelectedBook] = useState(null);
+const [returnModal, setReturnModal] = useState(false);
+const [DetailsModal, setDetailsModal] = useState(false);
 
 function handleOpen(book) {
+
+  if(book.status !== "Reserved – Pick Up"){
+    setSelectedBook(book);
+    setDetailsModal(true);
+    return;
+  }
   setSelectedBook(book);
   setPickUpModal(true);
 }
 
 function handleClose() {
+  setDetailsModal(false);
   setPickUpModal(false);
   setSelectedBook(null);
 }
@@ -140,7 +136,7 @@ const [cancelModal, setCancelModal] = useState(false);
 
               <div className="flex flex-col items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
                 <span className="text-xs text-gray-500">Availability</span>
-                <span className="text-green-600 font-bold">{book.isAvailable == "true" ? "Available" : "Unavailable"}</span>
+                <span className="text-green-600 font-bold">{book.isAvailable == "true" ? "Available" : "Unavailable"}({book.availableBooks})</span>
               </div>
 
               <div className="flex flex-col items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
@@ -202,13 +198,14 @@ const [cancelModal, setCancelModal] = useState(false);
           {isOpen && <Form book={book} close={()  => setIsOpen(false)} loadBooks={loadBooks} />}
           {UpdateBook && <UpdateBookForm load={loadBooks} book={book} close={() => setUpdateBook(false)}/>}
           {cancelModal && <CancelForm close={() => setCancelModal(false)} loadBooks={loadBooks} book={book}/>}
+          {returnModal && <ReturnForm close={() => setReturnModal(false)} loadBooks={loadBooks}/>}
 
         </div>
 
         <div className="mt-4 flex-center flex-col  gap-8 border border-gray-300 rounded-lg p-8 shadow-sm bg-white">
           <div className='grid grid-cols-3  w-full '>
             <div >
-              <button onClick={returnBook} className='btn anim-btn px-8'>
+              <button onClick={() => setReturnModal(true)} className='btn anim-btn px-8'>
                 Return Book
               </button>
             </div>
@@ -221,6 +218,7 @@ const [cancelModal, setCancelModal] = useState(false);
           </div>
 
           {selectedBook?.status === "Reserved – Pick Up" && pickUpModal && <PickupBook book={selectedBook} close={() => handleClose()} loadBooks={loadBooks}/>}
+          {DetailsModal && <TransactionDetails book={book} selectedBook={selectedBook} close={() => setDetailsModal(false)}/>}
           <table className="w-full text-sm text-left text-gray-700">
             <thead className="bg-blue-100 text-blue-700 uppercase text-xs font-semibold">
               <tr>
@@ -310,6 +308,83 @@ const [cancelModal, setCancelModal] = useState(false);
 }
 
 
+function ReturnForm({ close, loadBooks, book }) {
+  const [transactionId, setTransactionId] = useState("");
+
+  const returnBook = (e) => {
+    e.preventDefault();
+    fetch(`/borrow/return/${transactionId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        alert("Book returned successfully");
+        loadBooks();
+        close();
+      })
+      .catch(err => alert("Fetch error:", err));
+  };
+
+  return (
+    <div className="motion-preset-fade-sm fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-full motion-preset-pop max-w-md border border-gray-200 bg-white rounded-2xl p-6 shadow-lg relative">
+        {/* Header */}
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+          Return Book
+        </h2>
+        <p className="text-gray-500 mb-6">
+          Enter the transaction ID below to return a book.
+        </p>
+
+        {/* Form */}
+        <form className="space-y-4" onSubmit={returnBook}>
+          <div>
+            <label
+              htmlFor="transactionId"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Transaction ID
+            </label>
+            <input
+              type="text"
+              id="transactionId"
+              name="transactionId"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+              placeholder="e.g. TXN-486bfdd0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              onClick={close}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition"
+            >
+              Return
+            </button>
+          </div>
+        </form>
+
+        {/* Footer note */}
+        <div className="mt-4 text-sm text-gray-500 italic">
+          Make sure the transaction ID is correct before returning.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CancelForm({ close, loadBooks, book }) {
   const [transactionId, setTransactionId] = useState("");
 
@@ -389,10 +464,6 @@ function CancelForm({ close, loadBooks, book }) {
 }
 
 
-
-
-
-
 function Form({ close,book,loadBooks }) {
 
 
@@ -402,6 +473,8 @@ function Form({ close,book,loadBooks }) {
 
   const [duration, setDuration] = useState(0);
   const [remarks, setRemarks] = useState('');
+  const [idNUmber, setIdNumber] = useState('');
+  const [idType, setIdType] = useState('');
 
 
 
@@ -409,22 +482,6 @@ function Form({ close,book,loadBooks }) {
     e.preventDefault();
 
     const shortId = `TXN-${uuidv4().split('-')[0]}`;
-
-    const obj = {
-        title: book.title,
-        author: book.author,
-        year: book.year,
-        isbn: book.isbn,
-        coverImage: book.coverImage, //waiting, Borrowed, returned, overdue
-        borrowerName: borrowerName,
-        borrowerAddress: borrowerAddress,
-        borrowerContact: borrowerContact,
-        transactionId: shortId,
-        duration: duration,
-        remarks: remarks,
-      }
-
-      console.log(obj);
 
 
     fetch(`/borrow/add`, {
@@ -441,6 +498,8 @@ function Form({ close,book,loadBooks }) {
         borrowerName: borrowerName,
         borrowerAddress: borrowerAddress,
         borrowerContact: borrowerContact,
+        borrowerIdNumber: idNUmber,
+        borrowerIdType: idType,
         transactionId: shortId,
         duration: duration,
         remarks: remarks,
@@ -496,29 +555,59 @@ function Form({ close,book,loadBooks }) {
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Contact Number
-            </label>
-            <input
-              type="text"
-              onChange={(e) => setBorrowerContact(e.target.value)}
-              value={borrowerContact}
-              placeholder="e.g. 09123456789"
-              className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-              required
-            />
+          <div className='grid grid-cols-2 gap-4'>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Contact Number
+              </label>
+              <input
+                type="text"
+                onChange={(e) => setBorrowerContact(e.target.value)}
+                value={borrowerContact}
+                placeholder="e.g. 09123456789"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+
+            <div className='flex flex-col'>
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Borrow Duration 
+              </label>
+              <select value={duration} onChange={(e)=> setDuration(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
+                {[1,2,3,4,5,6,7].map((item) => (
+                  <option key={item} value={item}>{item} days</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className='flex flex-col'>
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Borrow Duration 
-            </label>
-            <select value={duration} onChange={(e)=> setDuration(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
-              {[1,2,3,4,5,6,7].map((item) => (
-                <option key={item} value={item}>{item} days</option>
-              ))}
-            </select>
+          <div className='grid grid-cols-2 gap-4'>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                ID Number
+              </label>
+              <input
+                type="text"
+                onChange={(e) => setIdNumber(e.target.value)}
+                value={idNUmber}
+                placeholder="e.g. 2024-001234"
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+              />
+            </div>
+
+            <div className='flex flex-col'>
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                ID Type
+              </label>
+              <select value={idType} onChange={(e)=> setIdType(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
+                <option value="">Select ID type</option>
+                {ValidID.map((item,index) => (
+                  <option key={index} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex flex-col">
@@ -819,6 +908,8 @@ function PickupBook({ book, close, loadBooks }) {
             <p><span className="font-semibold text-gray-800">Name:</span> {book.borrowerName}</p>
             <p><span className="font-semibold text-gray-800">Contact #:</span> {book.borrowerContact}</p>
             <p><span className="font-semibold text-gray-800">Address:</span> {book.borrowerAddress}</p>
+            <p><span className="font-semibold text-gray-800">ID Number:</span> {book.borrowerIdNumber}</p>
+            <p><span className="font-semibold text-gray-800">ID Type:</span> {book.borrowerIdType}</p>
           </div>
         </div>
 
@@ -835,6 +926,94 @@ function PickupBook({ book, close, loadBooks }) {
             className="anim-btn btn "
           >
             Confirm Pickup
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  );
+}
+
+function TransactionDetails({ book, close, selectedBook}) {
+
+  const pay = () => {
+    fetch(`/borrow/payPenalty/${selectedBook.transactionId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(res => res.json())
+      .then((data) => {
+        alert("Payment settled successfully!");
+        loadBooks();
+        close();
+      })
+      .catch(err => console.log(err));
+  }
+
+
+  return (
+    <div className="motion-preset-fade-sm fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-full motion-preset-pop max-w-2xl border border-gray-200 bg-white rounded-2xl p-8 shadow-lg relative">
+
+        {selectedBook.status === "Overdue" && selectedBook.penalty === "200" &&
+          <div className="absolute top-30 right-4 w-[300px] bg-red-100 border border-red-400 text-red-800 rounded-md p-4 w-80 shadow-md">
+            <p className="text-sm mb-3">
+              Please settle payment before returning the book. This book is overdue.
+            </p>
+            <div>
+            <button
+              onClick={pay}
+              className="px-3 py-1 bg-red-600 text-white rounded font-semibold anim-btn hover:bg-red-700 text-sm"
+            >
+              Settle payment
+            </button>
+            </div>
+          </div>
+        }
+
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold text-gray-800">Transaction Details</h2>
+          <h3 className="text-blue-500 text-xl font-bold">{selectedBook.transactionId}</h3>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">Book Details</h3>
+          <div className="flex items-start gap-5">
+            <img
+              src={book.coverImage}
+              alt={book.title}
+              className="w-24 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
+            />
+            <div className="flex flex-col gap-2 text-gray-700">
+              <p><span className="font-semibold text-gray-800">Title:</span> {book.title}</p>
+              <p><span className="font-semibold text-gray-800">Author:</span> {book.author}</p>
+              <p><span className="font-semibold text-gray-800">ISBN:</span> {book.isbn}</p>
+              <p><span className="font-semibold text-gray-800">Year:</span> {book.year}</p>
+            </div>
+          </div>
+        </div>
+
+
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">Borrower Details</h3>
+          <div className="flex flex-col gap-2 text-gray-700">
+            <p><span className="font-semibold text-gray-800">Name:</span> {selectedBook.borrowerName}</p>
+            <p><span className="font-semibold text-gray-800">Contact #:</span> {selectedBook.borrowerContact}</p>
+            <p><span className="font-semibold text-gray-800">Address:</span> {selectedBook.borrowerAddress}</p>
+            <p><span className="font-semibold text-gray-800">ID Number:</span> {selectedBook.borrowerIdNumber}</p>
+            <p><span className="font-semibold text-gray-800">ID Type:</span> {selectedBook.borrowerIdType}</p>
+          </div>
+        </div>
+
+
+        <div className="flex justify-end gap-3 ">
+          <button
+            onClick={close}
+            className="anim-btn btn bg-gray-500 hover:bg-gray-600"
+          >
+            Close
           </button>
         </div>
 

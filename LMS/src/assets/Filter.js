@@ -80,10 +80,10 @@ export function filterBorrow(Log, search, Date, status) {
 
 
 export const statusStyles = {
-  Borrowed: "bg-blue-200 text-blue-700",
+  Borrowed: "bg-green-200 text-green-700",
   Cancelled: "bg-gray-200 text-gray-700",
   Overdue: "bg-red-200 text-red-700",
-  Waiting: "bg-yellow-200 text-yellow-700",
-  "Reserved – Pick Up": "bg-green-200 text-green-700",
+  Waiting: "bg-orange-200 text-orange-700",
+  "Reserved – Pick Up": "bg-yellow-200 text-yellow-700",
   Returned: "bg-blue-200 text-blue-700"
 };

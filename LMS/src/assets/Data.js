@@ -130,3 +130,29 @@ export const books = [
     status: "Due Today"
   }
 ];
+
+export const ValidID = [
+  "Philippine Passport",
+  "Driver’s License (DL)",
+  "Unified Multi-Purpose ID (UMID)",
+  "Social Security System (SSS) ID",
+  "Government Service Insurance System (GSIS) eCard",
+  "Philippine Identification Card (PhilID / National ID)",
+  "Professional Regulation Commission (PRC) ID",
+  "Overseas Workers Welfare Administration (OWWA) ID",
+  "Integrated Bar of the Philippines (IBP) ID",
+  "Voter’s ID / Voter’s Certification",
+  "Postal ID",
+  "PWD (Persons With Disability) ID",
+  "Senior Citizen ID",
+  "TIN ID (BIR)",
+  "Student ID (for students only)",
+  "Alien Certificate of Registration (ACR I-Card)",
+  "PhilHealth ID",
+  "Seafarer’s Record Book (SRB)",
+  "NBI Clearance",
+  "Police Clearance",
+  "Barangay ID/Barangay Certification",
+  "Firearms License ID"
+];
+

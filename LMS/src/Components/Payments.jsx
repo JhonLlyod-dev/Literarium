@@ -6,14 +6,16 @@ import { filterLog } from "../assets/Filter";
 import {formatLocalDateTime} from "../assets/Dateformat";
 import { statusStyles } from "../assets/Filter";
 
-export default function ActivityLog() {
+export default function Payment() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterDate, setFilterDate] = useState("");
   
     const [log, setLog] = useState([]);
 
-    const filtered = filterLog(log,searchTerm,filterDate);
+    const Paid = log.filter((item) => item.penalty === "Paid");
+
+    const filtered = filterLog(Paid,searchTerm,filterDate);
 
 
   const getLog = async () => {
@@ -64,8 +66,8 @@ export default function ActivityLog() {
               <th className="px-4 py-3">Book Title</th>
               <th className="px-4 py-3">Borrower Name</th>
               <th className="px-4 py-3">Transaction ID</th>
-              <th className="px-4 py-3">Borrowed Date</th>
-              <th className="px-4 py-3">Returned Date</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Amount</th>
               <th className="px-4 py-3 text-center">Status</th>
             </tr>
           </thead>
@@ -97,17 +99,6 @@ export default function ActivityLog() {
                   <td className="px-4 py-3">{book.transactionId}</td>
                   <td className="px-4 py-3 text-gray-600">
                     {(() => {
-                      const dateTime = formatLocalDateTime(book.borrowDate);
-                      return (
-                        <div className="flex flex-col items-start">
-                          <span>{dateTime.date}</span>
-                          <span>{dateTime.time}</span>
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {(() => {
                       const dateTime = formatLocalDateTime(book.returnDate);
                       return (
                         <div className="flex flex-col items-start">
@@ -117,11 +108,14 @@ export default function ActivityLog() {
                       );
                     })()}
                   </td>
+                  <td className="px-4 py-3 text-start font-bold">
+                  <span className="text-lg">₱</span> 200.00
+                  </td>
                   <td className="px-4 py-3 text-center">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[book.status]}`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium bg-green-200 text-green-600`}
                     >
-                      {book.status}
+                      {book.penalty}
                     </span>
                   </td>
                 </tr>
