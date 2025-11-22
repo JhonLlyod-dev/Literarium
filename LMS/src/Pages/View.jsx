@@ -313,7 +313,7 @@ function ReturnForm({ close, loadBooks, book }) {
 
   const returnBook = (e) => {
     e.preventDefault();
-    fetch(`/borrow/return/${transactionId}`, {
+    fetch(`/borrow/returnBook/${transactionId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -471,7 +471,8 @@ function Form({ close,book,loadBooks }) {
   const [borrowerAddress, setBorrowerAddress] = useState('');
   const [borrowerContact, setBorrowerContact] = useState('');
 
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(1);
+  const [numofBooks, setNumofBooks] = useState(1);
   const [remarks, setRemarks] = useState('');
   const [idNUmber, setIdNumber] = useState('');
   const [idType, setIdType] = useState('');
@@ -484,7 +485,7 @@ function Form({ close,book,loadBooks }) {
     const shortId = `TXN-${uuidv4().split('-')[0]}`;
 
 
-    fetch(`/borrow/add`, {
+    fetch(`/borrow/add/${numofBooks}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -570,15 +571,36 @@ function Form({ close,book,loadBooks }) {
               />
             </div>
 
-            <div className='flex flex-col'>
-              <label className="text-sm font-medium text-gray-600 mb-1">
-                Borrow Duration 
-              </label>
-              <select value={duration} onChange={(e)=> setDuration(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
-                {[1,2,3,4,5,6,7].map((item) => (
-                  <option key={item} value={item}>{item} days</option>
-                ))}
-              </select>
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='flex flex-col'>
+                <label className="text-sm font-medium text-gray-600 mb-1">
+                  Duration 
+                </label>
+                <select value={duration} onChange={(e)=> setDuration(e.target.value)} className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'  name="" id="">
+                  {[1,2,3,4,5,6,7].map((item) => (
+                    <option key={item} value={item}>{item} days</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className='flex flex-col'>
+                <label className="text-sm font-medium text-gray-600 mb-1">
+                  Books 
+                </label>
+                <select
+                  value={numofBooks}
+                  onChange={(e) => setNumofBooks(e.target.value)}
+                  className='border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 outline-none resize-none'
+                >
+                  {Array.from({ length: book.availableBooks }, (_, i) => i + 1).map((num) => (
+                    <option key={num} value={num}>
+                      {num} books
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              
             </div>
           </div>
 
